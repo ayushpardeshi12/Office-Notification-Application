@@ -1,0 +1,40 @@
+{
+  "name": "office-notification-application",
+  "version": "1.0.1",
+  "description": "A real-time notification app for office support. Employees request assistance by pressing a button, instantly notifying staff with cabin details. Built with Node.js, Express, and Socket.io. Features include a simple UI, staff dashboard, and real-time updates. Scalable, secure, and easy to deploy for efficient office support.",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ayushpardeshi12/Office-Notification-Application.git"
+  },
+  "keywords": [
+    "Office Support",
+    "Real-Time Notifications",
+    "Service Request System",
+    "Node.js Application",
+    "Express.js",
+    "Socket.io",
+    "Staff Dashboard",
+    "Cabin Assistance",
+    "Web App",
+    "Real-Time Communication"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ayushpardeshi12/Office-Notification-Application/issues"
+  },
+  "homepage": "https://github.com/ayushpardeshi12/Office-Notification-Application#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "mongoose": "^8.5.3",
+    "nodemon": "^3.1.4",
+    "socket.io": "^4.7.5"
+  }
+}
