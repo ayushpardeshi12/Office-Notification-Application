@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 const User = require("./models/User");
 const Notification = require("./models/Notification");
 const dotenv = require("dotenv");
@@ -26,6 +27,25 @@ app.use(express.urlencoded({ extended: true }));
 app.set("views", "./views");
 app.set("view engine", "ejs");
 
+const authenticate = (req, res, next) => {
+  const token = req.header("Authorization").replace("Bearer ", "");
+  try {
+    const decoded = jwt.verify(token, "secret_key");
+    req.user = decoded;
+    if (req.user.role !== "admin") throw new Error("Not authorized");
+    next();
+  } catch (error) {
+    res.status(401).send({ message: "Please Authenticate" });
+  }
+};
+
+// Protected Routes Api
+
+app.get("/api/admin/users", authenticate, async (req, res) => {
+  const users = await User.find();
+  res.send(users);
+});
+
 //routes
 
 app.get("/", (req, res) => {
@@ -51,10 +71,10 @@ app.post("/api/notifications", async (req, res) => {
     const notification = new Notification(req.body);
     await notification.save();
     io.emit("new-notification", notification);
-    res.status(201).send(notification);
+    return res.status(201).send(notification);
   } catch (error) {
     console.error("Error creating notification:", error); // Log error details
-    res.status(400).send(error);
+    return res.status(400).send(error);
   }
 });
 
@@ -63,9 +83,44 @@ app.post("/api/notifications", async (req, res) => {
 app.get("/api/notifications", async (req, res) => {
   try {
     const notifications = await Notification.find().populate("staff");
-    res.status(200).send(notifications);
+    return res.status(200).send(notifications);
   } catch (error) {
-    res.status(500).send(error);
+    return res.status(500).send(error);
+  }
+});
+
+// Register a new user ( for admin use )
+
+app.post("/api/register", async (req, res) => {
+  try {
+    const { name, role, cabin, password } = req.body;
+    const user = new User({ name, role, cabin, password });
+    await user.save();
+    return res.status(201).send(user);
+  } catch (error) {
+    return res.status(400).send(error);
+  }
+});
+
+// Login route
+
+app.post("/api/login", async (req, res) => {
+  try {
+    const { name, password } = req.body;
+    console.log("Request Body", req.body);
+    const user = await User.findOne({ name });
+    console.log("Found User:", user);
+    if (!user) return res.status(404).send({ message: "User not found" });
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch)
+      return res.status(400).send({ message: "Invalid credentials" });
+
+    const token = jwt.sign({ id: user._id, role: user.role }, "secret_key", {
+      expiresIn: "1h",
+    });
+    res.send({ token });
+  } catch (error) {
+    res.status(400).send(error);
   }
 });
 
